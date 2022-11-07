@@ -76,3 +76,74 @@ ymax = np.amax(X_train[:, 1])
 ax.set_ylim([ymin - 3, ymax + 3])
 
 plt.show()
+
+
+
+
+
+#more
+def unit_step_func(x):
+        return np.where(x >= 0, 1, 0)
+
+def ReLU(x):
+        return np.where(x >= 0, x, 0)
+
+def sigmoid(x):
+    return np.where(1/(1 + np.exp(-x)) >= 0.5, 1, 0)
+
+class Perceptron:
+    def __init__(self, eta=0.01, iters=1000, activation_func=unit_step_func):
+        self.eta = eta
+        self.iters = iters
+        self.activation_func = activation_func
+        self.weights = None
+        self.bias = None
+
+    def fit(self, X, y):
+        n_samples, n_features = X.shape
+
+        self.weights = np.zeros(n_features)
+        self.bias = 0
+
+        y = np.array([1 if i > 0 else 0 for i in y])
+
+        for _ in range(self.iters):
+            for i, xi in enumerate(X):
+                linear_output = np.dot(xi, self.weights) + self.bias
+                y_pred = self.activation_func(linear_output)
+
+                update = self.eta * (y[i] - y_pred)
+
+                self.weights += update * xi
+                self.bias = update
+
+    def predict(self, X):
+        linear_output = np.dot(X, self.weights) + self.bias
+        y_pred = self.activation_func(linear_output)
+        return y_pred
+    
+ wbc = load_breast_cancer()
+X = wbc.data
+y = wbc.target
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2
+)
+
+p = Perceptron(eta=0.01, iters=1000, activation_func=unit_step_func)
+p.fit(X_train, y_train)
+y_pred = p.predict(X_test)
+
+p2 = Perceptron(eta=0.01, iters=1000, activation_func=ReLU)
+p2.fit(X_train, y_train)
+y_pred2 = p2.predict(X_test)
+
+p3 = Perceptron(eta=0.01, iters=1000, activation_func=sigmoid)
+p3.fit(X_train, y_train)
+y_pred3 = p3.predict(X_test)
+
+from sklearn.metrics import accuracy_score
+
+print("accuracy score 1: ", accuracy_score(y_test, y_pred))
+print("accuracy score 2: ", accuracy_score(y_test, y_pred2))
+print("accuracy score 3: ", accuracy_score(y_test, y_pred3))
